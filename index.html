@@ -16,7 +16,6 @@ body {
 
 #app-cover {
   position: relative;
-  z-index: 2;
   top: 90px;
   width: 430px;
   height: 100px;
@@ -321,10 +320,12 @@ body {
   color: #fff;
 }
 
-#youtube-player {
+
+
+#spotify-embed {
   position: absolute;
-  width: 200px;
-  height: 200px;
+  width: 430px;
+  height: 152px;
   left: 0;
   top: 0;
   opacity: 0.001;
@@ -333,62 +334,51 @@ body {
   overflow: hidden;
 }
 
-/* === FINAL MONOCHROME OVERRIDES === */
+#buffer-box {
+  display: none !important;
+}
+
+/* Final monochrome overrides */
 #player-track {
   background-color: #eeeeee !important;
 }
-
 #album-name {
   color: #444444 !important;
 }
-
 #track-name {
   color: #666666 !important;
 }
-
 #current-time,
 #track-length {
   background-color: #dcdcdc !important;
 }
-
 #track-time.active #current-time,
 #track-time.active #track-length {
   color: #555555 !important;
   background-color: transparent !important;
 }
-
 #s-area {
   background-color: #dcdcdc !important;
 }
-
 #seek-bar {
   background-color: #777777 !important;
 }
-
 #ins-time {
   background-color: #e6e6e6 !important;
   color: #666666 !important;
 }
-
 #s-hover {
   background-color: #bdbdbd !important;
 }
-
 #album-art.active {
   box-shadow: 0 0 0 4px #eeeeee, 0 30px 50px -15px #b5b5b5 !important;
-}
-
-
-/* Hide buffering message */
-#buffer-box {
-  display: none !important;
 }
 
 </style>
 </head>
 <body>
 <div id="app-cover">
-<div id="youtube-player" aria-hidden="true"></div>
+<div id="spotify-embed"></div>
 <div id="bg-artwork"></div>
 <div id="bg-layer"></div>
 <div id="player">
@@ -407,10 +397,10 @@ body {
   </div>
   <div id="player-content">
     <div id="album-art">
-      <img src="./shigesada.jpg?v=3" class="active" id="_1" alt="시게사다">
-      <img src="./kinggnu.jpg?v=3" id="_2" alt="King Gnu">
-      <img src="./vaundy.jpg?v=3" id="_3" alt="Vaundy">
-      <img src="./sakanaction.jpg?v=3" id="_4" alt="사카낙션">
+      <img src="./shigesada.jpg?v=4" class="active" id="_1" alt="시게사다">
+      <img src="./kinggnu.jpg?v=4" id="_2" alt="King Gnu">
+      <img src="./vaundy.jpg?v=4" id="_3" alt="Vaundy">
+      <img src="./sakanaction.jpg?v=4" id="_4" alt="사카낙션">
       <div id="buffer-box">Buffering ...</div>
     </div>
     <div id="player-controls">
@@ -433,65 +423,47 @@ body {
   </div>
 </div>
 </div>
-
-<script src="https://www.youtube.com/iframe_api"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
-<script>
-var ytPlayer = null;
-var ytReady = false;
+
+<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<script type="text/javascript">
+var embedController = null;
+var currIndex = 0;
+var isPaused = true;
+var progressTimer = null;
+var lastPlayback = {
+  position: 0,
+  duration: 0,
+  isPaused: true
+};
 
 var tracks = [
   {
     artist: "시게사다",
-    title: "남의 일 소리가 들려",
-    videoId: "PhTSPWvFsBk",
+    title: "남의 일 소리가 나",
+    uri: "spotify:track:4HRcAmACG7oIVPXZq31CSm",
     artwork: "_1"
   },
   {
     artist: "King Gnu",
     title: "백일",
-    videoId: "ony539T074w",
+    uri: "spotify:track:172fMG26G2OoEzzg0wn26r",
     artwork: "_2"
   },
   {
     artist: "Vaundy",
     title: "불가행력",
-    videoId: "B8bHLqgqRic",
+    uri: "spotify:track:24ntZeyCrVePmN3nUYhfLx",
     artwork: "_3"
   },
   {
     artist: "사카낙션",
     title: "모스",
-    videoId: "l2bYxc2vU6c",
+    uri: "spotify:track:4FdpXwtpJfRltvFuTcpNL6",
     artwork: "_4"
   }
 ];
-
-var currIndex = 0;
-var progressTimer = null;
-
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player("youtube-player", {
-    width: "200",
-    height: "200",
-    videoId: tracks[0].videoId,
-    playerVars: {
-      playsinline: 1,
-      controls: 0,
-      rel: 0,
-      fs: 0,
-      disablekb: 1
-    },
-    events: {
-      onReady: function () {
-        ytReady = true;
-        updateTrackUI();
-      },
-      onStateChange: onPlayerStateChange
-    }
-  });
-}
 
 function formatTime(seconds) {
   if (!isFinite(seconds) || seconds < 0) return "00:00";
@@ -509,139 +481,93 @@ function updateTrackUI() {
   $("#album-art img.active").removeClass("active");
   $("#" + track.artwork).addClass("active");
 
-  var bgArtworkUrl = $("#" + track.artwork).attr("src");
-  $("#bg-artwork").css("background-image", "url(" + bgArtworkUrl + ")");
-
   $("#seek-bar").width(0);
   $("#current-time").text("00:00");
   $("#track-length").text("00:00");
   $("#track-time").removeClass("active");
 }
 
+function setPlayingUI(playing) {
+  if (playing) {
+    $("#player-track").addClass("active");
+    $("#album-art").addClass("active");
+    $("#play-pause-button i").attr("class", "fas fa-pause");
+  } else {
+    $("#player-track").removeClass("active");
+    $("#album-art").removeClass("active");
+    $("#play-pause-button i").attr("class", "fas fa-play");
+  }
+}
+
 function loadTrack(index, autoplay) {
   currIndex = (index + tracks.length) % tracks.length;
   updateTrackUI();
 
-  if (!ytReady) return;
+  if (!embedController) return;
+
+  embedController.loadEntity(tracks[currIndex].uri);
+  isPaused = true;
+  setPlayingUI(false);
 
   if (autoplay) {
-    ytPlayer.loadVideoById(tracks[currIndex].videoId);
-  } else {
-    ytPlayer.cueVideoById(tracks[currIndex].videoId);
-  }
-}
-
-function setPlayingUI(isPlaying) {
-  if (isPlaying) {
-    $("#player-track").addClass("active");
-    $("#album-art").addClass("active");
-    $("#play-pause-button i").attr("class", "fas fa-pause");
-    startProgressTimer();
-  } else {
-    $("#player-track").removeClass("active");
-    $("#album-art").removeClass("active");
-    $("#album-art").removeClass("buffering");
-    $("#play-pause-button i").attr("class", "fas fa-play");
-    stopProgressTimer();
+    setTimeout(function () {
+      embedController.play();
+    }, 350);
   }
 }
 
 function playPause() {
-  if (!ytReady) return;
-
-  var state = ytPlayer.getPlayerState();
-
-  if (state === YT.PlayerState.PLAYING) {
-    ytPlayer.pauseVideo();
-  } else {
-    ytPlayer.playVideo();
-  }
+  if (!embedController) return;
+  embedController.togglePlay();
 }
 
-function onPlayerStateChange(event) {
-  if (event.data === YT.PlayerState.PLAYING) {
-    setPlayingUI(true);
-  } else if (event.data === YT.PlayerState.PAUSED) {
-    setPlayingUI(false);
-  } else if (event.data === YT.PlayerState.BUFFERING) {
-    $("#album-art").addClass("buffering");
-  } else if (event.data === YT.PlayerState.ENDED) {
-    $("#album-art").removeClass("buffering");
-    loadTrack(currIndex + 1, true);
-  } else if (event.data === YT.PlayerState.CUED) {
-    setPlayingUI(false);
-  }
-}
+function updateProgressFromState(data) {
+  if (!data) return;
 
-function startProgressTimer() {
-  stopProgressTimer();
-  progressTimer = setInterval(updateProgress, 250);
-}
+  lastPlayback.position = data.position || 0;
+  lastPlayback.duration = data.duration || 0;
+  lastPlayback.isPaused = !!data.isPaused;
+  isPaused = !!data.isPaused;
 
-function stopProgressTimer() {
-  if (progressTimer) {
-    clearInterval(progressTimer);
-    progressTimer = null;
-  }
-}
+  var currentSec = lastPlayback.position / 1000;
+  var durationSec = lastPlayback.duration / 1000;
 
-function updateProgress() {
-  if (!ytReady || !ytPlayer.getDuration) return;
+  $("#current-time").text(formatTime(currentSec));
+  $("#track-length").text(formatTime(durationSec));
 
-  var current = ytPlayer.getCurrentTime() || 0;
-  var duration = ytPlayer.getDuration() || 0;
-
-  $("#current-time").text(formatTime(current));
-  $("#track-length").text(formatTime(duration));
-
-  if (duration > 0) {
+  if (durationSec > 0) {
     $("#track-time").addClass("active");
-    $("#seek-bar").width((current / duration) * 100 + "%");
-  }
-}
-
-function showHover(event) {
-  if (!ytReady) return;
-
-  var sArea = $("#s-area");
-  var pos = sArea.offset();
-  var seekT = event.clientX - pos.left;
-  var duration = ytPlayer.getDuration() || 0;
-  var seekLoc = duration * (seekT / sArea.outerWidth());
-
-  seekT = Math.max(0, Math.min(seekT, sArea.outerWidth()));
-
-  $("#s-hover").width(seekT);
-  $("#ins-time")
-    .text(formatTime(seekLoc))
-    .css({ left: seekT, "margin-left": "-21px" })
-    .fadeIn(0);
-}
-
-function hideHover() {
-  $("#s-hover").width(0);
-  $("#ins-time")
-    .text("00:00")
-    .css({ left: "0px", "margin-left": "0px" })
-    .fadeOut(0);
-}
-
-function playFromClickedPos(event) {
-  if (!ytReady) return;
-
-  var sArea = $("#s-area");
-  var pos = sArea.offset();
-  var seekT = event.clientX - pos.left;
-  var duration = ytPlayer.getDuration() || 0;
-  var seekLoc = duration * (seekT / sArea.outerWidth());
-
-  if (duration > 0) {
-    ytPlayer.seekTo(seekLoc, true);
-    $("#seek-bar").width((seekLoc / duration) * 100 + "%");
+    $("#seek-bar").width((currentSec / durationSec) * 100 + "%");
   }
 
-  hideHover();
+  setPlayingUI(!isPaused);
 }
+
+window.onSpotifyIframeApiReady = function(IFrameAPI) {
+  var element = document.getElementById("spotify-embed");
+  var options = {
+    width: 430,
+    height: 152,
+    uri: tracks[0].uri
+  };
+
+  IFrameAPI.createController(element, options, function(controller) {
+    embedController = controller;
+    updateTrackUI();
+
+    controller.addListener("ready", function() {
+      updateTrackUI();
+    });
+
+    controller.addListener("playback_started", function() {
+      setPlayingUI(true);
+    });
+
+    controller.addListener("playback_update", function(e) {
+      updateProgressFromState(e.data);
+    });
+  });
+};
 
 $(function () {
   updateTrackUI();
@@ -656,11 +582,47 @@ $(function () {
     loadTrack(currIndex + 1, true);
   });
 
-  $("#s-area").mousemove(showHover);
-  $("#s-area").mouseout(hideHover);
-  $("#s-area").on("click", playFromClickedPos);
+  $("#s-area").mousemove(function(event) {
+    var durationSec = lastPlayback.duration / 1000;
+    if (!durationSec) return;
+
+    var sArea = $("#s-area");
+    var pos = sArea.offset();
+    var seekT = event.clientX - pos.left;
+    seekT = Math.max(0, Math.min(seekT, sArea.outerWidth()));
+    var seekLoc = durationSec * (seekT / sArea.outerWidth());
+
+    $("#s-hover").width(seekT);
+    $("#ins-time")
+      .text(formatTime(seekLoc))
+      .css({ left: seekT, "margin-left": "-21px" })
+      .fadeIn(0);
+  });
+
+  $("#s-area").mouseout(function() {
+    $("#s-hover").width(0);
+    $("#ins-time")
+      .text("00:00")
+      .css({ left: "0px", "margin-left": "0px" })
+      .fadeOut(0);
+  });
+
+  $("#s-area").on("click", function(event) {
+    if (!embedController || !lastPlayback.duration) return;
+
+    var sArea = $("#s-area");
+    var pos = sArea.offset();
+    var seekT = event.clientX - pos.left;
+    seekT = Math.max(0, Math.min(seekT, sArea.outerWidth()));
+
+    var seekSec = (lastPlayback.duration / 1000) *
+                  (seekT / sArea.outerWidth());
+
+    embedController.seek(Math.floor(seekSec));
+  });
 });
 </script>
+
 
 </body>
 </html>
