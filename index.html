@@ -320,37 +320,13 @@ body {
   color: #fff;
 }
 
-#youtube-player {
-  position: fixed;
-  width: 1px;
-  height: 1px;
-  left: -9999px;
-  top: -9999px;
-  overflow: hidden;
-}
 
-/* Hybrid YouTube player */
-#youtube-player-wrap {
-  width: 430px;
-  margin: 105px auto 0 auto;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
 
-#youtube-player {
-  width: 200px;
-  height: 200px;
-  border: 0;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
+/* Local audio version */
 #buffer-box {
   display: none !important;
 }
 
-/* Final monochrome overrides */
 #player-track {
   background-color: #eeeeee !important;
 }
@@ -408,10 +384,10 @@ body {
   </div>
   <div id="player-content">
     <div id="album-art">
-      <img src="./shigesada.jpg?v=5" class="active" id="_1" alt="시게사다">
-      <img src="./kinggnu.jpg?v=5" id="_2" alt="King Gnu">
-      <img src="./vaundy.jpg?v=5" id="_3" alt="Vaundy">
-      <img src="./sakanaction.jpg?v=5" id="_4" alt="사카낙션">
+      <img src="./shigesada.jpg?v=6" class="active" id="_1" alt="Track 1">
+      <img src="./kinggnu.jpg?v=6" id="_2" alt="Track 2">
+      <img src="./vaundy.jpg?v=6" id="_3" alt="Track 3">
+      <img src="./sakanaction.jpg?v=6" id="_4" alt="Track 4">
       <div id="buffer-box">Buffering ...</div>
     </div>
     <div id="player-controls">
@@ -438,212 +414,169 @@ body {
 
 
 <script>
-var ytPlayer = null;
-var ytReady = false;
-var currIndex = 0;
-var progressTimer = null;
-
-var tracks = [
-  {
-    artist: "시게사다",
-    title: "남의 일 소리가 들려",
-    videoId: "PhTSPWvFsBk",
-    artwork: "_1"
-  },
-  {
-    artist: "King Gnu",
-    title: "백일",
-    videoId: "ony539T074w",
-    artwork: "_2"
-  },
-  {
-    artist: "Vaundy",
-    title: "불가행력",
-    videoId: "B8bHLqgqRic",
-    artwork: "_3"
-  },
-  {
-    artist: "사카낙션",
-    title: "모스",
-    videoId: "l2bYxc2vU6c",
-    artwork: "_4"
-  }
-];
-
-function onYouTubeIframeAPIReady() {
-  ytPlayer = new YT.Player("youtube-player", {
-    width: "200",
-    height: "200",
-    videoId: tracks[0].videoId,
-    playerVars: {
-      playsinline: 1,
-      controls: 1,
-      rel: 0,
-      fs: 1,
-      modestbranding: 1
-    },
-    events: {
-      onReady: function() {
-        ytReady = true;
-        updateTrackUI();
-      },
-      onStateChange: onPlayerStateChange
-    }
-  });
-}
-
-function formatTime(seconds) {
-  if (!isFinite(seconds) || seconds < 0) return "00:00";
-  var m = Math.floor(seconds / 60);
-  var s = Math.floor(seconds % 60);
-  return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
-}
-
-function updateTrackUI() {
-  var track = tracks[currIndex];
-
-  $("#album-name").text(track.artist);
-  $("#track-name").text(track.title);
-
-  $("#album-art img.active").removeClass("active");
-  $("#" + track.artwork).addClass("active");
-
-  $("#seek-bar").width(0);
-  $("#current-time").text("00:00");
-  $("#track-length").text("00:00");
-  $("#track-time").removeClass("active");
-}
-
-function setPlayingUI(playing) {
-  if (playing) {
-    $("#player-track").addClass("active");
-    $("#album-art").addClass("active");
-    $("#play-pause-button i").attr("class", "fas fa-pause");
-    startProgressTimer();
-  } else {
-    $("#player-track").removeClass("active");
-    $("#album-art").removeClass("active");
-    $("#play-pause-button i").attr("class", "fas fa-play");
-    stopProgressTimer();
-  }
-}
-
-function loadTrack(index, autoplay) {
-  currIndex = (index + tracks.length) % tracks.length;
-  updateTrackUI();
-
-  if (!ytReady) return;
-
-  if (autoplay) {
-    ytPlayer.loadVideoById(tracks[currIndex].videoId);
-  } else {
-    ytPlayer.cueVideoById(tracks[currIndex].videoId);
-  }
-}
-
-function playPause() {
-  if (!ytReady) return;
-
-  var state = ytPlayer.getPlayerState();
-  if (state === YT.PlayerState.PLAYING) {
-    ytPlayer.pauseVideo();
-  } else {
-    ytPlayer.playVideo();
-  }
-}
-
-function onPlayerStateChange(event) {
-  if (event.data === YT.PlayerState.PLAYING) {
-    setPlayingUI(true);
-  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.CUED) {
-    setPlayingUI(false);
-  } else if (event.data === YT.PlayerState.ENDED) {
-    loadTrack(currIndex + 1, false);
-    setPlayingUI(false);
-  }
-}
-
-function startProgressTimer() {
-  stopProgressTimer();
-  progressTimer = setInterval(updateProgress, 250);
-}
-
-function stopProgressTimer() {
-  if (progressTimer) {
-    clearInterval(progressTimer);
-    progressTimer = null;
-  }
-}
-
-function updateProgress() {
-  if (!ytReady || !ytPlayer.getDuration) return;
-
-  var current = ytPlayer.getCurrentTime() || 0;
-  var duration = ytPlayer.getDuration() || 0;
-
-  $("#current-time").text(formatTime(current));
-  $("#track-length").text(formatTime(duration));
-
-  if (duration > 0) {
-    $("#track-time").addClass("active");
-    $("#seek-bar").width((current / duration) * 100 + "%");
-  }
-}
-
 $(function () {
-  updateTrackUI();
+  var playerTrack = $("#player-track"),
+      albumName = $("#album-name"),
+      trackName = $("#track-name"),
+      albumArt = $("#album-art"),
+      sArea = $("#s-area"),
+      seekBar = $("#seek-bar"),
+      trackTime = $("#track-time"),
+      insTime = $("#ins-time"),
+      sHover = $("#s-hover"),
+      playPauseButton = $("#play-pause-button"),
+      icon = playPauseButton.find("i"),
+      tProgress = $("#current-time"),
+      tTime = $("#track-length"),
+      playPreviousTrackButton = $("#play-previous"),
+      playNextTrackButton = $("#play-next");
 
-  $("#play-pause-button").on("click", playPause);
+  var tracks = [
+    { artist: "", title: "1", artwork: "_1", url: "./시게사다.mp3" },
+    { artist: "", title: "2", artwork: "_2", url: "./백일.mp3" },
+    { artist: "", title: "3", artwork: "_3", url: "./불가행력.mp3" },
+    { artist: "", title: "4", artwork: "_4", url: "./모스.mp3" }
+  ];
 
-  $("#play-previous").on("click", function() {
-    loadTrack(currIndex - 1, false);
-  });
+  var audio = new Audio();
+  var currIndex = 0;
+  var seekLoc = 0;
+  var seekT = 0;
 
-  $("#play-next").on("click", function() {
-    loadTrack(currIndex + 1, false);
-  });
+  function formatTime(seconds) {
+    if (!isFinite(seconds) || seconds < 0) return "00:00";
+    var m = Math.floor(seconds / 60);
+    var s = Math.floor(seconds % 60);
+    return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+  }
 
-  $("#s-area").mousemove(function(event) {
-    if (!ytReady) return;
+  function updateTrackUI() {
+    var track = tracks[currIndex];
 
-    var duration = ytPlayer.getDuration() || 0;
-    if (!duration) return;
+    albumName.text(track.artist);
+    trackName.text(track.title);
 
-    var sArea = $("#s-area");
+    albumArt.find("img.active").removeClass("active");
+    $("#" + track.artwork).addClass("active");
+
+    seekBar.width(0);
+    tProgress.text("00:00");
+    tTime.text("00:00");
+    trackTime.removeClass("active");
+  }
+
+  function loadTrack(index, autoplay) {
+    currIndex = (index + tracks.length) % tracks.length;
+    var track = tracks[currIndex];
+
+    audio.src = track.url;
+    audio.load();
+    updateTrackUI();
+
+    if (autoplay) {
+      audio.play().catch(function () {});
+    }
+  }
+
+  function setPlayingUI(playing) {
+    if (playing) {
+      playerTrack.addClass("active");
+      albumArt.addClass("active");
+      icon.attr("class", "fas fa-pause");
+    } else {
+      playerTrack.removeClass("active");
+      albumArt.removeClass("active");
+      icon.attr("class", "fas fa-play");
+    }
+  }
+
+  function playPause() {
+    if (audio.paused) {
+      audio.play().catch(function () {});
+    } else {
+      audio.pause();
+    }
+  }
+
+  function updateCurrTime() {
+    var current = audio.currentTime || 0;
+    var duration = audio.duration || 0;
+
+    tProgress.text(formatTime(current));
+    tTime.text(formatTime(duration));
+
+    if (duration > 0) {
+      trackTime.addClass("active");
+      seekBar.width((current / duration) * 100 + "%");
+    } else {
+      trackTime.removeClass("active");
+    }
+  }
+
+  function showHover(event) {
+    if (!isFinite(audio.duration) || audio.duration <= 0) return;
+
     var pos = sArea.offset();
-    var seekT = event.clientX - pos.left;
+    seekT = event.clientX - pos.left;
     seekT = Math.max(0, Math.min(seekT, sArea.outerWidth()));
-    var seekLoc = duration * (seekT / sArea.outerWidth());
+    seekLoc = audio.duration * (seekT / sArea.outerWidth());
 
-    $("#s-hover").width(seekT);
-    $("#ins-time")
+    sHover.width(seekT);
+    insTime
       .text(formatTime(seekLoc))
       .css({ left: seekT, "margin-left": "-21px" })
       .fadeIn(0);
-  });
+  }
 
-  $("#s-area").mouseout(function() {
-    $("#s-hover").width(0);
-    $("#ins-time")
+  function hideHover() {
+    sHover.width(0);
+    insTime
       .text("00:00")
       .css({ left: "0px", "margin-left": "0px" })
       .fadeOut(0);
-  });
+  }
 
-  $("#s-area").on("click", function(event) {
-    if (!ytReady) return;
+  function playFromClickedPos(event) {
+    if (!isFinite(audio.duration) || audio.duration <= 0) return;
 
-    var duration = ytPlayer.getDuration() || 0;
-    if (!duration) return;
-
-    var sArea = $("#s-area");
     var pos = sArea.offset();
-    var seekT = event.clientX - pos.left;
-    seekT = Math.max(0, Math.min(seekT, sArea.outerWidth()));
+    var x = event.clientX - pos.left;
+    x = Math.max(0, Math.min(x, sArea.outerWidth()));
+    audio.currentTime = audio.duration * (x / sArea.outerWidth());
+    hideHover();
+  }
 
-    var seekLoc = duration * (seekT / sArea.outerWidth());
-    ytPlayer.seekTo(seekLoc, true);
+  playPauseButton.on("click", playPause);
+
+  playPreviousTrackButton.on("click", function () {
+    loadTrack(currIndex - 1, true);
   });
+
+  playNextTrackButton.on("click", function () {
+    loadTrack(currIndex + 1, true);
+  });
+
+  sArea.mousemove(showHover);
+  sArea.mouseout(hideHover);
+  sArea.on("click", playFromClickedPos);
+
+  $(audio).on("play", function () {
+    setPlayingUI(true);
+  });
+
+  $(audio).on("pause", function () {
+    setPlayingUI(false);
+  });
+
+  $(audio).on("timeupdate", updateCurrTime);
+
+  $(audio).on("loadedmetadata", updateCurrTime);
+
+  $(audio).on("ended", function () {
+    loadTrack(currIndex + 1, true);
+  });
+
+  loadTrack(0, false);
 });
 </script>
 
