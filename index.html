@@ -16,6 +16,7 @@ body {
 
 #app-cover {
   position: relative;
+  z-index: 2;
   top: 90px;
   width: 430px;
   height: 100px;
@@ -321,11 +322,14 @@ body {
 }
 
 #youtube-player {
-  position: fixed;
-  width: 1px;
-  height: 1px;
-  left: -9999px;
-  top: -9999px;
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  left: 0;
+  top: 0;
+  opacity: 0.001;
+  pointer-events: none;
+  z-index: 0;
   overflow: hidden;
 }
 
@@ -374,10 +378,17 @@ body {
   box-shadow: 0 0 0 4px #eeeeee, 0 30px 50px -15px #b5b5b5 !important;
 }
 
+
+/* Hide buffering message */
+#buffer-box {
+  display: none !important;
+}
+
 </style>
 </head>
 <body>
 <div id="app-cover">
+<div id="youtube-player" aria-hidden="true"></div>
 <div id="bg-artwork"></div>
 <div id="bg-layer"></div>
 <div id="player">
@@ -423,7 +434,6 @@ body {
 </div>
 </div>
 
-<div id="youtube-player" aria-hidden="true"></div>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.js"></script>
 
@@ -463,13 +473,15 @@ var progressTimer = null;
 
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player("youtube-player", {
-    width: "1",
-    height: "1",
+    width: "200",
+    height: "200",
     videoId: tracks[0].videoId,
     playerVars: {
       playsinline: 1,
       controls: 0,
-      rel: 0
+      rel: 0,
+      fs: 0,
+      disablekb: 1
     },
     events: {
       onReady: function () {
