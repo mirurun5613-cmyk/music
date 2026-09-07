@@ -1,6 +1,6 @@
 <html>
 <head>
-<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.3.1/css/all.css'><link rel="stylesheet" href="./style.css">
+<link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.3.1/css/all.css'>
 <style>
 *:focus {
   outline: none;
@@ -328,6 +328,52 @@ body {
   top: -9999px;
   overflow: hidden;
 }
+
+/* === FINAL MONOCHROME OVERRIDES === */
+#player-track {
+  background-color: #eeeeee !important;
+}
+
+#album-name {
+  color: #444444 !important;
+}
+
+#track-name {
+  color: #666666 !important;
+}
+
+#current-time,
+#track-length {
+  background-color: #dcdcdc !important;
+}
+
+#track-time.active #current-time,
+#track-time.active #track-length {
+  color: #555555 !important;
+  background-color: transparent !important;
+}
+
+#s-area {
+  background-color: #dcdcdc !important;
+}
+
+#seek-bar {
+  background-color: #777777 !important;
+}
+
+#ins-time {
+  background-color: #e6e6e6 !important;
+  color: #666666 !important;
+}
+
+#s-hover {
+  background-color: #bdbdbd !important;
+}
+
+#album-art.active {
+  box-shadow: 0 0 0 4px #eeeeee, 0 30px 50px -15px #b5b5b5 !important;
+}
+
 </style>
 </head>
 <body>
@@ -350,10 +396,10 @@ body {
   </div>
   <div id="player-content">
     <div id="album-art">
-      <img src="./shigesada.jpg" class="active" id="_1">
-      <img src="./kinggnu.jpg" id="_2">
-      <img src="./vaundy.jpg" id="_3">
-      <img src="./sakanaction.jpg" id="_4">
+      <img src="./shigesada.jpg?v=3" class="active" id="_1" alt="시게사다">
+      <img src="./kinggnu.jpg?v=3" id="_2" alt="King Gnu">
+      <img src="./vaundy.jpg?v=3" id="_3" alt="Vaundy">
+      <img src="./sakanaction.jpg?v=3" id="_4" alt="사카낙션">
       <div id="buffer-box">Buffering ...</div>
     </div>
     <div id="player-controls">
