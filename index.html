@@ -62,7 +62,7 @@ body {
   right: 15px;
   left: 15px;
   padding: 13px 22px 10px 184px;
-  background-color: #fff7f7;
+  background-color: #eeeeee;
   border-radius: 15px 15px 0 0;
   transition: 0.3s ease top;
   z-index: 1;
@@ -73,13 +73,13 @@ body {
 }
 
 #album-name {
-  color: #54576f;
+  color: #4a4a4a;
   font-size: 17px;
   font-weight: bold;
 }
 
 #track-name {
-  color: #acaebd;
+  color: #6a6a6a;
   font-size: 13px;
   margin: 2px 0 13px 0;
 }
@@ -102,14 +102,14 @@ body {
 #track-length {
   color: transparent;
   font-size: 11px;
-  background-color: #ffe8ee;
+  background-color: #dcdcdc;
   border-radius: 10px;
   transition: 0.3s ease all;
 }
 
 #track-time.active #current-time,
 #track-time.active #track-length {
-  color: #f86d92;
+  color: #555555;
   background-color: transparent;
 }
 
@@ -121,7 +121,7 @@ body {
 }
 
 #s-area {
-  background-color: #ffe8ee;
+  background-color: #dcdcdc;
   cursor: pointer;
 }
 
@@ -145,9 +145,13 @@ body {
   z-index: 2;
 }
 
-#ins-time,
+#ins-time {
+  background-color: #e6e6e6;
+  color: #666666;
+}
+
 #s-hover {
-  background-color: #3b3d50;
+  background-color: #bdbdbd;
 }
 
 #seek-bar {
@@ -157,7 +161,7 @@ body {
   bottom: 0;
   left: 0;
   width: 0;
-  background-color: #fd6d94;
+  background-color: #777777;
   transition: 0.2s ease width;
   z-index: 1;
 }
@@ -186,7 +190,7 @@ body {
 
 #album-art.active {
   top: -60px;
-  box-shadow: 0 0 0 4px #fff7f7, 0 30px 50px -15px #afb7c1;
+  box-shadow: 0 0 0 4px #eeeeee, 0 30px 50px -15px #b5b5b5;
 }
 
 #album-art:before {
@@ -346,10 +350,10 @@ body {
   </div>
   <div id="player-content">
     <div id="album-art">
-      <img src="https://i.ytimg.com/vi/PhTSPWvFsBk/hqdefault.jpg" class="active" id="_1">
-      <img src="https://i.ytimg.com/vi/ony539T074w/hqdefault.jpg" id="_2">
-      <img src="https://i.ytimg.com/vi/B8bHLqgqRic/hqdefault.jpg" id="_3">
-      <img src="https://i.ytimg.com/vi/l2bYxc2vU6c/hqdefault.jpg" id="_4">
+      <img src="./shigesada.jpg" class="active" id="_1">
+      <img src="./kinggnu.jpg" id="_2">
+      <img src="./vaundy.jpg" id="_3">
+      <img src="./sakanaction.jpg" id="_4">
       <div id="buffer-box">Buffering ...</div>
     </div>
     <div id="player-controls">
